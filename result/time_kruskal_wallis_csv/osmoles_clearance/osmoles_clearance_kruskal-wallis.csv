@@ -1,0 +1,7 @@
+groups,.y.,n,statistic,df,p,method
+1,val,70,0.17074170536745337,4,0.997,Kruskal-Wallis
+2,val,70,7.731728228727417,4,0.102,Kruskal-Wallis
+3,val,70,6.951449418457875,4,0.138,Kruskal-Wallis
+4,val,70,18.165138577827555,4,0.00115,Kruskal-Wallis
+5,val,70,11.29492313460814,4,0.0234,Kruskal-Wallis
+6,val,70,11.68693461181782,4,0.0198,Kruskal-Wallis

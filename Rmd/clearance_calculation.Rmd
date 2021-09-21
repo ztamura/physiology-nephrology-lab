@@ -1,0 +1,161 @@
+---
+title: "Clearance calculations"
+author: "Zen Tamura"
+date: 2021-09-07
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+# knitr::opts_chunk$set(echo = TRUE)
+# knitr::opts_chunk$set(error = FALSE)
+# knitr::opts_chunk$set(message = FALSE)
+# knitr::opts_chunk$set(warning = FALSE)
+
+##########
+knitr::opts_chunk$set(root.dir = rprojroot::find_rstudio_root_file())
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+##########
+```
+
+```{r}
+sessionInfo()
+```
+
+
+```{r}
+library(tidyverse)
+```
+
+
+# 1. Load data
+
+```{r}
+# urine creatinine concentration in mg/dL
+urine_creatinine_concentration <- read_csv("data/creatinine_concentration.csv", 
+                                           skip = 1,
+                                           locale = locale(encoding = "UTF-8"))
+urine_creatinine_concentration
+
+# urine flow rate in mL/min
+urine_flow_rate <- read_csv("data/urine_flow_rate.csv", 
+                            skip = 1,
+                            locale = locale(encoding = "UTF-8"))
+urine_flow_rate
+
+# osmotic pressure in mOSM/kg/H2O
+osmotic_pressure <- read_csv("data/osmotic_pressure.csv", 
+                            skip = 1,
+                            locale = locale(encoding = "UTF-8"))
+osmotic_pressure
+
+# pH
+ph <- read_csv("data/ph.csv", 
+               skip = 1,
+               locale = locale(encoding = "UTF-8"))
+ph
+
+# ammonia concentration in g/L
+ammonia_concentration <- read_csv("data/ammonia_concentration.csv", 
+                                  skip = 1,
+                                  locale = locale(encoding = "UTF-8"))
+ammonia_concentration
+```
+
+# 2. Creatinine clearance
+
+$$C_{\text{creatinine}} = \frac{[U]_{\text{creatinine}} \cdot \dot{V}}{[P]_{\text{creatinine}}}$$
+
+where
+$[U]_{\text{creatinine}}$: urine concentration of creatinine (mg/dL)
+$\dot{V}$: urine flow rate (mL/min)
+$[P]_{\text{creatinine}} = 1.15$ mg/dL : plasma concentration of creatinine (mg/dL)
+
+```{r}
+creatinine_clearance <- urine_creatinine_concentration[,2:6] * urine_flow_rate[,2:6]
+creatinine_clearance <- creatinine_clearance / 1.15
+
+
+# creatinine_clearance %>% 
+#     add_column(groups = urine_creatinine_concentration$`班/時間(min)`, .before = 1) %>% 
+    # write_csv("result/creatinine_clearance.csv")
+
+creatinine_clearance <- add_column(creatinine_clearance,
+                                   groups =  urine_creatinine_concentration$`班/時間(min)`,
+                                   .before = 1)
+
+creatinine_clearance
+# add_column(creatinine_clearance, groups = urine_creatinine_concentration$`班/時間(min)`, .before = 1)
+
+# creatinine_clearance <- cbind(rn = rownames(urine_creatinine_concentration),
+#                               creatinine_clearance,
+#                               row.names = NULL)
+# creatinine_clearance$groups <- urine_creatinine_concentration[,1]
+# write_csv(creatinine_clearance, "result/creatinine_clearance.csv")
+
+# creatinine_clearance %>% 
+#     rename(groups = `班/時間(min)` ) %>% 
+#     write_csv("result/creatinine_clearance.csv")
+
+# write_csv(creatinine_clearance, "result/creatinine_clearance.csv")
+
+```
+
+
+# 3. Clearance of osmoles (浸透圧クリアランス)
+
+clearance in mL/min
+
+$$C_{\text{osm}} = \frac{[U]_{\text{osm}} \cdot \dot{V}}{[P]_{\text{osm}}}$$
+
+where,
+
+$[U]_{\text{osm}}$: urine osmolarity (mOsm / (kg H2O))
+$\dot{V}$: urine flow rate (mL/min)
+$[P]_{\text{osm}} = 290$ (mOsm / (kg H2O)): plasma osmolarity
+
+```{r}
+osmoles_clearance <- osmotic_pressure[, 2:6] * urine_flow_rate[, 2:6]
+osmoles_clearance <- osmoles_clearance / 290
+# osmoles_clearance %>% 
+#     add_column(groups = osmotic_pressure$`班/時間(min)`, .before = 1) %>% 
+    # write_csv("result/osmoles_clearance.csv")
+osmoles_clearance <- add_column(osmoles_clearance, groups = osmotic_pressure$`班/時間(min)`, .before = 1)
+osmoles_clearance
+```
+
+
+# 4. Free water clearance
+
+$$C_{\text{H2O}} = \dot{V} - C_{\text{osm}} $$
+where
+$C_{\text{osm}}$: clearance of osmoles
+
+```{r}
+free_water_clearance <- urine_flow_rate[, 2:6] - osmoles_clearance[, 2:6]
+free_water_clearance <- add_column(free_water_clearance, 
+                                   groups = osmotic_pressure$`班/時間(min)`,
+                                   .before = 1)
+# write_csv(free_water_clearance, "result/free_water_clearance.csv")
+free_water_clearance
+```
+
+# 5. Reabsorption rate
+
+If the filtered volume = water's volume, then reabsorption rate (mL/min) is
+
+$$\text{Reabsorption rate} = \text{GFR} -  \dot{V} \approx C_{\text{creatinine}} - \dot{V}$$
+
+```{r}
+# creatinine_clearance
+reabsorptiona_rate<- (creatinine_clearance[, 2:6] - urine_flow_rate[, 2:6]) * 100 / creatinine_clearance[, 2:6]
+reabsorptiona_rate <- add_column(reabsorptiona_rate,
+                                 groups = urine_flow_rate$`班/時間(min)`,
+                                 .before = 1)
+# write_csv(reabsorptiona_rate, "result/reabsorption_rate_210918.csv")
+reabsorptiona_rate
+```
+
+
+

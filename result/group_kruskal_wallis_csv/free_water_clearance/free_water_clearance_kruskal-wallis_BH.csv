@@ -1,0 +1,6 @@
+time,.y.,n,statistic,df,p,method
+0,val,84,4.8411544514128755,5,0.436,Kruskal-Wallis
+30,val,84,13.537059831779619,5,0.0188,Kruskal-Wallis
+60,val,84,56.61583122997589,5,6.07e-11,Kruskal-Wallis
+90,val,84,62.2946301104353,5,4.08e-12,Kruskal-Wallis
+120,val,84,47.92030802965736,5,3.69e-9,Kruskal-Wallis
