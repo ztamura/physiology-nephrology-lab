@@ -6,7 +6,9 @@ This repository contains Rmd scripts used for statistical analysis of nephrology
 
 * `Rmd/`
     
-    Contains Rmd scripts for statistical analysis and clearance calculation.
+    * `analysis.Rmd`: Scripts used to perform statistical analysis (hypothesis testing).
+    
+    * `clearance_calculation.Rmd`: Scripts used to calculate clearance.
 
 * `result/`
 
