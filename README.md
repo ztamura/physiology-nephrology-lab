@@ -2,6 +2,8 @@
 
 This repository contains Rmd scripts used for statistical analysis of nephrology lab results.
 
+All analysis used R version 4.0.3.
+
 ## Directory Structure
 
 * `Rmd/`
