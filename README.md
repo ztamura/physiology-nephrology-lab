@@ -1,4 +1,4 @@
-# Nephorology Lab Analysis
+# Nephrology Lab Analysis
 
 This repository contains Rmd scripts used for statistical analysis of nephrology lab results.
 
